@@ -107,7 +107,7 @@ public class ConceptVuforiaNavRoverRuckus extends LinearOpMode {
      * Once you've obtained a license key, copy the string from the Vuforia web site
      * and paste it in to your code on the next line, between the double quotes.
      */
-    private static final String VUFORIA_KEY = " -- YOUR NEW VUFORIA KEY GOES HERE  --- ";
+    private static final String VUFORIA_KEY = "AT7QKiL/////AAAAGeKBVq1RDUPguKLF+15FhXqF3t9uezSpyH+MOiIRIzXPag/SSaX5qRqyhWcePalKSb6I+63wj2FDof9O8IHGIwGPTU13sA9u9QXsepbMstRhKpr8pf6S2+zy+ozyggk8uLSVL0Q0PsiryFrWAWj1Pgmm18ISeMTu7cntx8ItGwqqQa608v7RgOsQDE69WD7NNjJB2T44lR7LkbTh94wvEX19ZFw022bopusHHCY2cRrviNAykXwDf+SlOC3qcInxe8u3/4uAtqA8IIMkLop2NUeVeOuyY0vVxRMTTsbBiTqUZ/F+NhozSodIYjY7pAjNDURwmrwpq3wqwXfUnL8n0ehl95WKRnB9BnP90HB73xwE";
 
     // Since ImageTarget trackables use mm to specifiy their dimensions, we must use mm for all the physical dimension.
     // We will define some constants and conversions here
