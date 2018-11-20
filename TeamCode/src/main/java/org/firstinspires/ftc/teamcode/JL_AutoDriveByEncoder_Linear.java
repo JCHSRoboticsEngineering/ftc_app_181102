@@ -27,7 +27,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.firstinspires.ftc.teamcode.org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
@@ -35,11 +35,11 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.robotcontroller.external.samples.HardwarePushbot;
+import org.firstinspires.ftc.teamcode.JL_HardwareRabbot;
 
 /**
  * This file illustrates the concept of driving a path based on encoder counts.
- * It uses the common Pushbot hardware class to define the drive on the robot.
+ * It uses the common Pushbot hardware class to define the drive on the jl_rabbot
  * The code is structured as a LinearOpMode
  *
  * The code REQUIRES that you DO have encoders on the wheels,
@@ -64,12 +64,12 @@ import org.firstinspires.ftc.robotcontroller.external.samples.HardwarePushbot;
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  */
 
-@Autonomous(name="Pushbot: Auto Drive By Encoder", group="Pushbot")
+@Autonomous(name="Rabbot: Auto Drive By Encoder", group="Rabbot")
 //@Disabled
-public class JL_RabbotAutoDriveByEncoder_Linear extends LinearOpMode {
+public class JL_AutoDriveByEncoder_Linear extends LinearOpMode {
 
     /* Declare OpMode members. */
-    HardwarePushbot robot   = new HardwarePushbot();   // Use a Pushbot's hardware
+    JL_HardwareRabbot       jl_rabbot = new JL_HardwareRabbot();   // Use Rabbot's hardware
     private ElapsedTime     runtime = new ElapsedTime();
 
     static final double     COUNTS_PER_MOTOR_REV    = 1440 ;    // eg: TETRIX Motor Encoder
@@ -87,22 +87,22 @@ public class JL_RabbotAutoDriveByEncoder_Linear extends LinearOpMode {
          * Initialize the drive system variables.
          * The init() method of the hardware class does all the work here
          */
-        robot.init(hardwareMap);
+        jl_rabbot.init(hardwareMap);
 
         // Send telemetry message to signify robot waiting;
         telemetry.addData("Status", "Resetting Encoders");    //
         telemetry.update();
 
-        robot.leftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        //robot.rightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        jl_rabbot.leftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        jl_rabbot.rightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-        robot.leftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        //robot.rightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        jl_rabbot.leftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        jl_rabbot.rightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         // Send telemetry message to indicate successful Encoder reset
         telemetry.addData("Path0",  "Starting at %7d :%7d",
-                          robot.leftDrive.getCurrentPosition(),
-                          /*robot.rightDrive.getCurrentPosition()*/);
+                           jl_rabbot.leftDrive.getCurrentPosition(),
+                           jl_rabbot.rightDrive.getCurrentPosition());
         telemetry.update();
 
         // Wait for the game to start (driver presses PLAY)
@@ -114,8 +114,8 @@ public class JL_RabbotAutoDriveByEncoder_Linear extends LinearOpMode {
         encoderDrive(TURN_SPEED,   12, -12, 4.0);  // S2: Turn Right 12 Inches with 4 Sec timeout
         encoderDrive(DRIVE_SPEED, -24, -24, 4.0);  // S3: Reverse 24 Inches with 4 Sec timeout
 
-        //robot.leftClaw.setPosition(1.0);            // S4: Stop and close the claw.
-        //robot.rightClaw.setPosition(0.0);
+        jl_rabbot.leftClaw.setPosition(1.0);            // S4: Stop and close the claw.
+        jl_rabbot.rightClaw.setPosition(0.0);
         sleep(1000);     // pause for servos to move
 
         telemetry.addData("Path", "Complete");
@@ -140,19 +140,19 @@ public class JL_RabbotAutoDriveByEncoder_Linear extends LinearOpMode {
         if (opModeIsActive()) {
 
             // Determine new target position, and pass to motor controller
-            newLeftTarget = robot.leftDrive.getCurrentPosition() + (int)(leftInches * COUNTS_PER_INCH);
-           // newRightTarget = robot.rightDrive.getCurrentPosition() + (int)(rightInches * COUNTS_PER_INCH);
-            robot.leftDrive.setTargetPosition(newLeftTarget);
-            //robot.rightDrive.setTargetPosition(newRightTarget);
+            newLeftTarget = jl_rabbot.leftDrive.getCurrentPosition() + (int)(leftInches * COUNTS_PER_INCH);
+            newRightTarget = jl_rabbot.rightDrive.getCurrentPosition() + (int)(rightInches * COUNTS_PER_INCH);
+            jl_rabbot.leftDrive.setTargetPosition(newLeftTarget);
+            jl_rabbot.rightDrive.setTargetPosition(newRightTarget);
 
             // Turn On RUN_TO_POSITION
-            robot.leftDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            //robot.rightDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            jl_rabbot.leftDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            jl_rabbot.rightDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
             // reset the timeout time and start motion.
             runtime.reset();
-            robot.leftDrive.setPower(Math.abs(speed));
-            //robot.rightDrive.setPower(Math.abs(speed));
+            jl_rabbot.leftDrive.setPower(Math.abs(speed));
+            jl_rabbot.rightDrive.setPower(Math.abs(speed));
 
             // keep looping while we are still active, and there is time left, and both motors are running.
             // Note: We use (isBusy() && isBusy()) in the loop test, which means that when EITHER motor hits
@@ -162,25 +162,25 @@ public class JL_RabbotAutoDriveByEncoder_Linear extends LinearOpMode {
             // onto the next step, use (isBusy() || isBusy()) in the loop test.
             while (opModeIsActive() &&
                    (runtime.seconds() < timeoutS) &&
-                   (robot.leftDrive.isBusy() /*&& robot.rightDrive.isBusy())*/) {
+                   (jl_rabbot.leftDrive.isBusy() && jl_rabbot.rightDrive.isBusy())) {
 
                 // Display it for the driver.
                 telemetry.addData("Path1",  "Running to %7d :%7d", newLeftTarget,  newRightTarget);
                 telemetry.addData("Path2",  "Running at %7d :%7d",
-                                            robot.leftDrive.getCurrentPosition(),
-                                            //robot.rightDrive.getCurrentPosition());
+                                            jl_rabbot.leftDrive.getCurrentPosition(),
+                                            jl_rabbot.rightDrive.getCurrentPosition());
                 telemetry.update();
             }
 
             // Stop all motion;
-            robot.leftDrive.setPower(0);
-            //robot.rightDrive.setPower(0);
+            jl_rabbot.leftDrive.setPower(0);
+            jl_rabbot.rightDrive.setPower(0);
 
             // Turn off RUN_TO_POSITION
-            robot.leftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            //robot.rightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            jl_rabbot.leftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            jl_rabbot.rightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-            //  sleep(250);   // optional pause after each move
+            sleep(2500);   // optional pause after each move
         }
     }
 }
