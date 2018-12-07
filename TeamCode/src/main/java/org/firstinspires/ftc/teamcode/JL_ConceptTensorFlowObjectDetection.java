@@ -29,15 +29,22 @@
 
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+// import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+// import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.util.ElapsedTime;
+// import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+// import com.qualcomm.robotcore.hardware.DcMotor;
+// import com.qualcomm.robotcore.util.ElapsedTime;
+
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer.CameraDirection;
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
+// import org.firstinspires.ftc.teamcode.JL_AutoDriveByEncoder_Linear;
 
 import java.util.List;
 
@@ -51,12 +58,24 @@ import java.util.List;
  * IMPORTANT: In order to use this OpMode, you need to obtain your own Vuforia license key as
  * is explained below.
  */
-@TeleOp(name = "Rabbot: TensorFlow Object Detection", group = "Concept")
+@Autonomous(name = "Rabbot: TensorFlow Object Detection", group = "Concept")
 // @Disabled
+
 public class JL_ConceptTensorFlowObjectDetection extends LinearOpMode {
     private static final String TFOD_MODEL_ASSET = "RoverRuckus.tflite";
     private static final String LABEL_GOLD_MINERAL = "Gold Mineral";
     private static final String LABEL_SILVER_MINERAL = "Silver Mineral";
+    JL_HardwareRabbot       jl_rabbot = new JL_HardwareRabbot();   // Use Rabbot's hardware
+    private ElapsedTime     runtime = new ElapsedTime();
+
+    static final double     COUNTS_PER_MOTOR_REV    = 1440 ;    // eg: TETRIX Motor Encoder
+    static final double     DRIVE_GEAR_REDUCTION    = 2.0 ;     // This is < 1.0 if geared UP
+    static final double     WHEEL_DIAMETER_INCHES   = 4.0 ;     // For figuring circumference
+    static final double     COUNTS_PER_INCH         = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
+            (WHEEL_DIAMETER_INCHES * 3.1415);
+    static final double     DRIVE_SPEED             = 0.6;
+    static final double     TURN_SPEED              = 0.5;
+
 
     /*
      * IMPORTANT: You need to obtain your own license key to use Vuforia. The string below with which
@@ -90,6 +109,8 @@ public class JL_ConceptTensorFlowObjectDetection extends LinearOpMode {
         // The TFObjectDetector uses the camera frames from the VuforiaLocalizer, so we create that
         // first.
         initVuforia();
+
+        JL_AutoDriveByEncoder_Linear linearEncoder = new JL_AutoDriveByEncoder_Linear();
 
         if (ClassFactory.getInstance().canCreateTFObjectDetector()) {
             initTfod();
@@ -131,10 +152,16 @@ public class JL_ConceptTensorFlowObjectDetection extends LinearOpMode {
                         if (goldMineralX != -1 && silverMineral1X != -1 && silverMineral2X != -1) {
                           if (goldMineralX < silverMineral1X && goldMineralX < silverMineral2X) {
                             telemetry.addData("Gold Mineral Position", "Left");
+                            //go left
+
                           } else if (goldMineralX > silverMineral1X && goldMineralX > silverMineral2X) {
                             telemetry.addData("Gold Mineral Position", "Right");
+                            //go right
+
                           } else {
-                            telemetry.addData("Gold Mineral Position", "Center");
+                            telemetry.addData("Gold Mineral Position", "Center - MOVE!!!");
+                            linearEncoder.encoderDrive(5.0, 10.0, 10.0, 0.0);
+                            //go straight
                           }
                         }
                       }
@@ -148,6 +175,62 @@ public class JL_ConceptTensorFlowObjectDetection extends LinearOpMode {
             tfod.shutdown();
         }
     }
+
+    /*
+    public void encoderDrive(double speed,
+                             double leftInches, double rightInches,
+                             double timeoutS) {
+        int newLeftTarget;
+        int newRightTarget;
+
+        // Ensure that the opmode is still active
+        if (opModeIsActive()) {
+
+            // Determine new target position, and pass to motor controller
+            newLeftTarget = jl_rabbot.leftDrive.getCurrentPosition() + (int)(leftInches * COUNTS_PER_INCH);
+            newRightTarget = jl_rabbot.rightDrive.getCurrentPosition() + (int)(rightInches * COUNTS_PER_INCH);
+            jl_rabbot.leftDrive.setTargetPosition(newLeftTarget);
+            jl_rabbot.rightDrive.setTargetPosition(newRightTarget);
+
+            // Turn On RUN_TO_POSITION
+            jl_rabbot.leftDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            jl_rabbot.rightDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+            // reset the timeout time and start motion.
+            runtime.reset();
+            jl_rabbot.leftDrive.setPower(Math.abs(speed));
+            jl_rabbot.rightDrive.setPower(Math.abs(speed));
+
+            // keep looping while we are still active, and there is time left, and both motors are running.
+            // Note: We use (isBusy() && isBusy()) in the loop test, which means that when EITHER motor hits
+            // its target position, the motion will stop.  This is "safer" in the event that the robot will
+            // always end the motion as soon as possible.
+            // However, if you require that BOTH motors have finished their moves before the robot continues
+            // onto the next step, use (isBusy() || isBusy()) in the loop test.
+            while (opModeIsActive() &&
+                    (runtime.seconds() < timeoutS) &&
+                    (jl_rabbot.leftDrive.isBusy() && jl_rabbot.rightDrive.isBusy())) {
+
+                // Display it for the driver.
+                telemetry.addData("Path1",  "Running to %7d :%7d", newLeftTarget,  newRightTarget);
+                telemetry.addData("Path2",  "Running at %7d :%7d",
+                        jl_rabbot.leftDrive.getCurrentPosition(),
+                        jl_rabbot.rightDrive.getCurrentPosition());
+                telemetry.update();
+            }
+
+            // Stop all motion;
+            jl_rabbot.leftDrive.setPower(0);
+            jl_rabbot.rightDrive.setPower(0);
+
+            // Turn off RUN_TO_POSITION
+            jl_rabbot.leftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            jl_rabbot.rightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+            sleep(2500);   // optional pause after each move
+        }
+    }
+    */
 
     /**
      * Initialize the Vuforia localization engine.
